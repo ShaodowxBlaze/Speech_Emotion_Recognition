@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Recognition</title>
+    <script>
+        function handleFormSubmit(event) {
+            event.preventDefault();  // Prevent form from submitting normally
+            
+            const formData = new FormData(event.target);
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display the predicted emotion
+                document.getElementById('result').textContent = "Predicted Emotion: " + data.predicted_emotion;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('result').textContent = "Error occurred during prediction.";
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>Upload an Audio File</h1>
+    <form onsubmit="handleFormSubmit(event)" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".wav" required>
+        <input type="submit" value="Upload">
+    </form>
+    
+    <!-- Section to display the prediction result -->
+    <div id="result" style="margin-top: 20px;"></div>
+</body>
+</html>
