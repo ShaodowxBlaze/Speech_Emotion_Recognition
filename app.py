@@ -43,6 +43,39 @@ def extract_features(file_path):
 
     return np.expand_dims(mfccs, axis=-1)  # Add an extra dimension for Conv2D input
 
+# Function to detect emotion for every 20 seconds in a wav file
+def detect_emotions(file_path):
+    # Load audio data
+    audio_data, sample_rate = librosa.load(file_path, sr=None)
+    
+    segment_duration = 20  # Duration of each segment in seconds
+    segment_samples = segment_duration * sample_rate  # Number of samples in each segment
+    
+    num_segments = len(audio_data) // segment_samples  # Number of segments
+    
+    emotions = []
+    
+    for i in range(num_segments):
+        start_sample = i * segment_samples
+        end_sample = start_sample + segment_samples
+        
+        audio_segment = audio_data[start_sample:end_sample]
+        
+        features = extract_features(audio_segment, sample_rate)
+        features = np.expand_dims(features, axis=0)  # Add batch dimension
+        
+        # Prediction
+        prediction = model.predict(features)
+        predicted_index = np.argmax(prediction, axis=1)[0]  # Get index of the highest predicted value
+        
+        if predicted_index < len(emotion_labels):
+            predicted_emotion = emotion_labels[predicted_index]  # Map index to emotion label
+            emotions.append(predicted_emotion)
+        else:
+            emotions.append('unknown')
+    
+    return emotions
+
 # Route for home page
 @app.route('/')
 def index():
